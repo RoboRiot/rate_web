@@ -6,7 +6,7 @@ import  firebase from './firebase';
 // import Slider from '@material-ui/core/Slider';
 
 function App() {
- 
+  const info = document.createElement("p")
   var models = {}
 
   // var storage = require('@google-cloud/storage')
@@ -15,17 +15,18 @@ function App() {
 
   var cur_name = ""
   // console.log("hm?")
-  readDB()
-  
+  // readDB()
+  selectUser()
 
   function writeDB(){
     
-    firebase.database().ref('models').set(models)
+    firebase.database().ref('models/'+username).set(models)
    
   }
 
   function readDB(){
-    var compare = firebase.database().ref('models')
+    console.log("username: " + username)
+    var compare = firebase.database().ref('models/'+username)
     compare.on('value', function(snapshot) {
       // console.log(snapshot.val()["Alejandro-Barreto"]);
       models = snapshot.val()
@@ -39,14 +40,12 @@ function App() {
     compare.on('value', function(snapshot) {
       // console.log(snapshot.val()["Alejandro-Barreto"]);
       var cur_file = snapshot.val()[cur_name]
-      const newImg = document.createElement("json")
-      newImg.height = "500"
-      newImg.width = "500"
-      newImg.innerHTML = JSON.stringify(cur_file)
-      // console.log(document.getElementById(ctr))
-      console.log(cur_file)
-      document.body.appendChild(newImg)
-      ctr = ctr + 1
+      
+
+      info.innerHTML = "Weight: " + cur_file["Weight"] + "&nbsp; Height: " + cur_file["Height"] + "<br>" + "Hips: " + cur_file["Hips"] + "&nbsp; Waist: " + cur_file["Waist"] + "&nbsp; Chest: " + cur_file["Chest"] + "<br>"
+      
+      document.body.appendChild(info)
+      
       // console.log(models)
       
     });
@@ -67,7 +66,7 @@ function App() {
 
       for (var i = 0; i < result["prefixes"].length; i++) {
         cur_name = result["prefixes"][i]["location"]["path"]
-
+        readJSONDB()
         if (name_list.includes(cur_name) == false) {
           console.log("success")
           loadImages(cur_name)
@@ -125,15 +124,6 @@ function App() {
     
   }
 
-  // function handleChange  (event, newValue) {
-  //   setValue(newValue);
-  //   document.getElementById("demo").innerHTML = "Value: " + newValue + "%"
-  // };
-
-  // const [value, setValue] = React.useState(30);
-  // const value = 50
-  // const setValue = React.useState(30);
-
   function final() {
     models[cur_name] = parseInt(document.getElementById("quantity").value)
 
@@ -148,12 +138,66 @@ function App() {
     init()
   }
 
+  function selectUser(){
+    const title = document.createElement("p")
+    const io = document.createElement("input")
+    const btn = document.createElement("button")
+
+    title.innerHTML = "Enter username: "
+    title.id = "t_username"
+
+    io.id="i_username"
+
+    btn.addEventListener("click", selected); 
+    btn.innerHTML="Enter"
+    btn.id="b_username"
+
+    document.body.appendChild(title)
+    document.body.appendChild(io)
+    document.body.appendChild(btn)
+  }
+
+  function selected(){
+    console.log("entered: " + document.getElementById("i_username").value)
+    username = document.getElementById("i_username").value
+
+    document.getElementById("t_username").remove()
+    document.getElementById("i_username").remove()
+    document.getElementById("b_username").remove()
+
+    const title = document.createElement("p")
+    const io = document.createElement("input")
+    const btn = document.createElement("button")
+
+    title.innerHTML = "Enter Rating [1-3]: "
+    title.id = "t_rating"
+
+    io.id="quantity"
+    io.type="number"
+    io.min="1"
+    io.max="3"
+
+    btn.addEventListener("click", final); 
+    btn.innerHTML="Continue"
+    btn.id="b_rating"
+
+    document.body.appendChild(title)
+    document.body.appendChild(io)
+    document.body.appendChild(btn)
+    document.body.appendChild(info)
+    
+    readDB()
+  }
+
+  var username = ""
+
   return (
     <div className="App" >
       {/* <Slider value={value} onChange={handleChange} aria-labelledby="continuous-slider" /> */}
+      {/* <p>Enter Rating: [1-3]</p>
       <input type="number" id="quantity" name="quantity" min="1" max="5"></input>
       <p><span id="demo"></span></p>
-      <button onClick={final}>Continue</button>
+      <button onClick={final}>Continue</button> */}
       
     </div>
   );
